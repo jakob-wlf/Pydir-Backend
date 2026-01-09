@@ -1,6 +1,7 @@
 package de.pydir.service
 
 import de.pydir.data.AccountProperties
+import de.pydir.dto.ChangePasswordRequest
 import de.pydir.dto.LoginRequest
 import de.pydir.dto.RegisterRequest
 import de.pydir.entity.Account
@@ -46,13 +47,12 @@ class AuthService(
         return jwtUtil.generateToken(account)
     }
 
-
     fun login(request: LoginRequest): String {
         val account = accountRepository.findByUsername(request.username)
             .orElseThrow { IllegalArgumentException("Invalid username or password") }
 
         if (!passwordEncoder.matches(request.password, account.password)) {
-            throw IllegalArgumentException("Invalid email or password")
+            throw IllegalArgumentException("Invalid username or password")
         }
 
         return jwtUtil.generateToken(account)

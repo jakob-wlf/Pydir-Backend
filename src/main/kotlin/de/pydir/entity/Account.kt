@@ -30,6 +30,10 @@ data class Account(
 
 
     @Column(nullable = false)
+    var language: String = "de",
+
+
+    @Column(nullable = false)
     var isInGame: Boolean = false,
 
     @Column(nullable = false)
@@ -46,7 +50,6 @@ data class Account(
         inverseJoinColumns = [JoinColumn(name = "role_id")]
     )
     var roles: MutableSet<Role> = mutableSetOf(),
-
 
 
     @Column(nullable = false)

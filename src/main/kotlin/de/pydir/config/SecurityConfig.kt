@@ -25,7 +25,12 @@ class SecurityConfig {
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/api/auth/**").permitAll()
                 auth.requestMatchers("/api/debug/**").permitAll()
+
+                auth.requestMatchers("/api/admin/test-connection").permitAll()
+                auth.requestMatchers("/api/admin/client-version").permitAll()
+
                 auth.requestMatchers("/api/admin/**").hasRole("ADMIN")
+                auth.requestMatchers("/api/giftcard/**").hasRole("ADMIN")
                 auth.anyRequest().authenticated()
             }
             .formLogin { it.disable() }

@@ -2,6 +2,23 @@ package de.pydir.dto
 
 import de.pydir.entity.Account
 
+data class ChangeAccountInfosRequest(
+    val username: String? = null,
+    val selectedEffect: Int? = null,
+    val selectedCharacter: Int? = null,
+    val preferredGiftcardType: String? = null,
+    val language: String? = null
+)
+
+data class ChangePasswordRequest(
+    val oldPassword: String,
+    val newPassword: String
+)
+
+data class DeleteAccountRequest(
+    val password: String
+)
+
 data class AccountResponse(
     val email: String,
     val username: String,
@@ -13,7 +30,8 @@ data class AccountResponse(
     val preferredGiftcardType: String,
     val rockets: Int,
     val coins: Int,
-    val credits: Int
+    val credits: Int,
+    val language: String
 ) {
     companion object {
         fun fromAccount(account: Account): AccountResponse {
@@ -28,7 +46,8 @@ data class AccountResponse(
                 preferredGiftcardType = account.preferredGiftcardType,
                 rockets = account.rockets,
                 coins = account.coins,
-                credits = account.credits
+                credits = account.credits,
+                language = account.language
             )
         }
     }
