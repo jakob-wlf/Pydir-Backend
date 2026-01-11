@@ -1,6 +1,8 @@
 package de.pydir.security
 
 import de.pydir.entity.Account
+import de.pydir.repository.AccountRepository
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
@@ -15,7 +17,9 @@ class JwtUtil(
     private val secret: String,
 
     @Value("\${jwt.expiration}")
-    private val expirationMs: Long
+    private val expirationMs: Long,
+
+    private val accountRepository: AccountRepository
 ) {
     private val secretKey: SecretKey = Keys.hmacShaKeyFor(secret.toByteArray())
 
@@ -27,6 +31,7 @@ class JwtUtil(
 
         return Jwts.builder()
             .setSubject(account.email)
+            .claim("accountId", account.id.toString())
             .claim("roles", roles)
             .setIssuedAt(now)
             .setExpiration(expiryDate)
@@ -58,13 +63,33 @@ class JwtUtil(
         }
     }
 
+    private fun getClaims(token: String): Claims {
+        return Jwts.parserBuilder()
+            .setSigningKey(secretKey)
+            .build()
+            .parseClaimsJws(token)
+            .body
+    }
+
+    fun getAccountIdFromToken(token: String): String {
+        return getClaims(token)["accountId"] as String
+    }
+
     fun validateToken(token: String): Boolean {
         return try {
-            Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-            true
+            val claims = getClaims(token)
+            val accountId = claims["accountId"] as? String
+
+            // Verify the account still exists and matches
+            if (accountId != null) {
+                val account = accountRepository.findById(accountId.toLong())
+                    .orElse(null)
+
+                // Token is invalid if account doesn't exist or email doesn't match
+                account != null && account.email == claims.subject
+            } else {
+                false
+            }
         } catch (ex: Exception) {
             false
         }

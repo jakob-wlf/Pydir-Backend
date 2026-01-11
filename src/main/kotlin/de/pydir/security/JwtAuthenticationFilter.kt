@@ -1,5 +1,6 @@
 package de.pydir.security
 
+import de.pydir.repository.AccountRepository
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -14,7 +15,8 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 class JwtAuthenticationFilter(
     private val jwtUtil: JwtUtil,
-    private val userDetailsService: UserDetailsService
+    private val userDetailsService: UserDetailsService,
+    private val accountRepository: AccountRepository
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
@@ -27,21 +29,28 @@ class JwtAuthenticationFilter(
             val token = authHeader.substring(7)
             if (jwtUtil.validateToken(token)) {
                 val email = jwtUtil.getEmailFromToken(token)
-                val roles = jwtUtil.getRolesFromToken(token)
+                val accountId = jwtUtil.getAccountIdFromToken(token)
 
-                // Convert role strings to GrantedAuthority
-                val authorities = roles.map { SimpleGrantedAuthority(it) }
+                // Verify account exists and matches
+                val account = accountRepository.findById(accountId.toLong())
+                    .orElse(null)
 
-                val userDetails: UserDetails = userDetailsService.loadUserByUsername(email)
-                val authToken = UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    authorities // Use authorities from JWT
-                )
-                SecurityContextHolder.getContext().authentication = authToken
+                if (account != null && account.email == email) {
+                    // Use CURRENT roles from database, not JWT
+                    val authorities = account.roles.map {
+                        SimpleGrantedAuthority(it.name)
+                    }
+
+                    val userDetails: UserDetails = userDetailsService.loadUserByUsername(email)
+                    val authToken = UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        authorities
+                    )
+                    SecurityContextHolder.getContext().authentication = authToken
+                }
             }
         }
-
         filterChain.doFilter(request, response)
     }
 }
