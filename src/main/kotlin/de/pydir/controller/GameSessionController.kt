@@ -15,8 +15,8 @@ class GameSessionController(
 ) {
 
     @PostMapping
-    fun createSession(@RequestBody request: CreateSessionRequest): GameSessionResponse {
-        return gameSessionService.createSession(request)
+    fun createSession(): GameSessionResponse {
+        return gameSessionService.createSession()
     }
 
     @PostMapping("/{sessionId}/join")

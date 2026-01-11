@@ -27,7 +27,7 @@ class GameSessionService(
     private val hmacSecret: String
 ) {
 
-    fun createSession(request: CreateSessionRequest): GameSessionResponse {
+    fun createSession(): GameSessionResponse {
         val sessionToken = UUID.randomUUID()
         
         val session = GameSession(
