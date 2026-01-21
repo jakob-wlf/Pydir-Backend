@@ -23,6 +23,7 @@ class GameSessionService(
     private val timeSubmissionRepo: TimeSubmissionRepository,
     private val accountRepo: AccountRepository,
     private val leaderboardService: LeaderboardService,
+    private val accountService: AccountService,
     @Value("\${game.server.hmac.secret}")
     private val hmacSecret: String
 ) {
@@ -55,8 +56,13 @@ class GameSessionService(
         }
         
         // Verify account exists
-        accountRepo.findById(request.accountId)
+        val account = accountRepo.findById(request.accountId)
             .orElseThrow { AccountNotFoundException() }
+
+        // Check if account is verified
+        if (!accountService.isVerified(account)) {
+            throw AccountNotVerifiedException()
+        }
         
         // Check if already joined
         if (participantRepo.existsByGameSessionIdAndAccountId(sessionId, request.accountId)) {

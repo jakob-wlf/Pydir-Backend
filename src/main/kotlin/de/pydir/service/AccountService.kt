@@ -37,6 +37,10 @@ class AccountService(
         return AccountResponse.fromAccount(account)
     }
 
+    fun isVerified(account: Account): Boolean {
+        return account.isEmailVerified && account.isPhoneVerified
+    }
+
     fun changePassword(user: User, request: ChangePasswordRequest) {
         val account = accountRepository.findByEmail(user.username)
             .orElseThrow { IllegalArgumentException("Account not found") }

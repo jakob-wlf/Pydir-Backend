@@ -37,6 +37,8 @@ class SecurityConfig {
                 auth.requestMatchers("/api/leaderboard/**").permitAll()
                 auth.requestMatchers("/api/admin/test-connection").permitAll()
                 auth.requestMatchers("/api/admin/client-version").permitAll()
+                auth.requestMatchers("/api/verification/email/**").permitAll()
+                auth.requestMatchers("/api/verification/phone/**").permitAll()
 
                 // Game server endpoints - protected by API key filter
                 auth.requestMatchers("/api/game-sessions/**").permitAll()

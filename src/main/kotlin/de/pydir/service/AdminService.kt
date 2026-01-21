@@ -1,6 +1,7 @@
 package de.pydir.service
 
 import de.pydir.dto.DetailedAccountResponse
+import de.pydir.entity.Verification
 import de.pydir.repository.RoleRepository
 import de.pydir.repository.AccountRepository
 import org.springframework.beans.factory.annotation.Value
@@ -12,7 +13,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AdminService(
     private val accountRepository: AccountRepository,
-    private val roleRepository: RoleRepository
+    private val roleRepository: RoleRepository,
+    private val verificationService: VerificationService
 ) {
 
     @Transactional
@@ -53,6 +55,20 @@ class AdminService(
     fun getPaginatedAccounts(pageable: Pageable, includeBots: Boolean): Page<DetailedAccountResponse> {
         return if(includeBots) accountRepository.findAll(pageable).map { DetailedAccountResponse.fromAccount(it) }
         else accountRepository.findByIsBotFalse(pageable).map { DetailedAccountResponse.fromAccount(it) }
+    }
+
+    fun verifyAccount(accountId: Long) {
+        val account = accountRepository.findById(accountId)
+            .orElseThrow { IllegalArgumentException("Account not found") }
+
+        verificationService.verifyAccount(account)
+    }
+
+    fun verifyAccount(accountId: Long, type: Verification.VerficationType) {
+        val account = accountRepository.findById(accountId)
+            .orElseThrow { IllegalArgumentException("Account not found") }
+
+        verificationService.verifyAccount(account, type)
     }
 
     fun deleteAccount(accountId: Long) {
