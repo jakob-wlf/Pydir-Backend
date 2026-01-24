@@ -27,7 +27,8 @@ class RestExceptionHandler {
         InvalidSessionTokenException::class,
         InvalidProofException::class,
         PlayerNotInSessionException::class,
-        AccountNotVerifiedException::class
+        AccountNotVerifiedException::class,
+        VerificationException::class
     )
     fun handleBadRequest(ex: RuntimeException): ResponseEntity<ErrorResponse> {
         return ResponseEntity

@@ -17,6 +17,7 @@ class AuthService(
     private val roleRepository: RoleRepository,
     private val accountProperties: AccountProperties,
     private val passwordEncoder: PasswordEncoder,
+    private val verificationService: VerificationService,
     private val jwtUtil: JwtUtil
 ) {
 
@@ -43,6 +44,8 @@ class AuthService(
         account.roles.add(userRole)
 
         accountRepository.save(account)
+
+        verificationService.createVerification(account)
 
         return jwtUtil.generateToken(account)
     }

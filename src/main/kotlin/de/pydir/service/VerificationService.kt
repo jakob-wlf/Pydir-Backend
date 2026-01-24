@@ -50,6 +50,19 @@ class VerificationService(
     }
 
     private fun createVerificationForType(account: Account, type: Verification.VerficationType) {
+        when(type) {
+            Verification.VerficationType.EMAIL -> {
+                if (account.isEmailVerified) {
+                    throw VerificationException("Email is already verified")
+                }
+            }
+            Verification.VerficationType.PHONE -> {
+                if (account.isPhoneVerified) {
+                    throw VerificationException("Phone number is already verified")
+                }
+            }
+        }
+
         // Delete any existing verifications of this type
         val existingVerifications = verificationRepository.findByAccountIdAndType(account.id, type)
         if (existingVerifications.isNotEmpty()) {
@@ -68,8 +81,8 @@ class VerificationService(
 
         // Send to user
         when (type) {
-            Verification.VerficationType.EMAIL -> {}
-            Verification.VerficationType.PHONE -> messagingService.sendVerificationSms(account.phoneNumber, verification.token)
+            Verification.VerficationType.EMAIL -> messagingService.sendVerificationMail(account.email, verification.token, account.id, account.username, account.language)
+            Verification.VerficationType.PHONE -> messagingService.sendVerificationSms(account.phoneNumber, verification.token, account.id, account.language)
         }
     }
 
